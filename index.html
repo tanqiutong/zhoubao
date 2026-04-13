@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>2026年4月周报面板</title>
+    <meta
+      name="description"
+      content="基于月度待办整理的产品周报网站，涵盖未来美术坊、成长守护与 H1 指标进展。"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">产品周报工作台</p>
+          <h1>2026 年 4 月周报与历史记录</h1>
+          <p class="hero-text" id="heroText"></p>
+          <div class="hero-actions">
+            <button id="copyWeeklySummary" class="primary-btn">复制当前周摘要</button>
+            <button id="jumpHistory" class="ghost-btn">查看历史时间线</button>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-top">
+            <span>本月聚焦</span>
+            <strong id="generatedAt"></strong>
+          </div>
+          <div id="summaryCards" class="summary-grid"></div>
+        </div>
+      </header>
+
+      <main class="main-layout">
+        <section class="panel reminder-panel">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">每日提醒</p>
+              <h2>每天更新一次工作进度</h2>
+            </div>
+            <p class="section-desc" id="dailyReminderStatus"></p>
+          </div>
+          <div class="daily-layout">
+            <div class="daily-editor">
+              <div id="dailyReminderMeta" class="meta-inline"></div>
+              <p class="hero-text" id="dailyReminderText"></p>
+              <div id="dailyReminderChecklist" class="checklist-grid"></div>
+              <textarea
+                id="dailyUpdateInput"
+                class="daily-textarea"
+                placeholder="示例：\n1. 今天推进了什么\n2. 目前卡点是什么\n3. 明天准备做什么"
+              ></textarea>
+              <div class="hero-actions">
+                <button id="saveDailyUpdate" class="primary-btn">保存今日进度</button>
+                <button id="copyDailyUpdate" class="ghost-btn">复制今日记录</button>
+              </div>
+              <p class="storage-hint">当前会保存到本浏览器，适合每天持续补充；对外同步时可继续复制到周报或邮件。</p>
+            </div>
+            <aside class="daily-side">
+              <div class="daily-side-card">
+                <p class="section-kicker compact-kicker">最近 7 天</p>
+                <div id="dailyUpdateList" class="daily-log-list"></div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">周报视图</p>
+              <h2>按周查看重点事项</h2>
+            </div>
+            <p class="section-desc">把零散的日常记录整理为可对外同步的周报结构，支持按项目筛选。</p>
+          </div>
+          <div class="filters">
+            <div id="weekTabs" class="chip-row"></div>
+            <div id="projectFilters" class="chip-row secondary"></div>
+          </div>
+          <div id="weekOverview" class="week-overview"></div>
+          <div id="weekContent" class="cards-grid"></div>
+        </section>
+
+        <section class="split-layout">
+          <section class="panel">
+            <div class="section-head compact">
+              <div>
+                <p class="section-kicker">指标拆解</p>
+                <h2>2026 H1 目标追踪</h2>
+              </div>
+            </div>
+            <div id="kpiCards" class="stack-list"></div>
+          </section>
+
+          <aside class="side-stack">
+            <section class="panel small-panel">
+              <div class="section-head compact">
+                <div>
+                  <p class="section-kicker">待决策</p>
+                  <h2>AI 画廊关键问题</h2>
+                </div>
+              </div>
+              <div id="questionBoard" class="question-list"></div>
+            </section>
+
+            <section class="panel small-panel">
+              <div class="section-head compact">
+                <div>
+                  <p class="section-kicker">下步动作</p>
+                  <h2>建议优先推进</h2>
+                </div>
+              </div>
+              <div id="nextSteps" class="todo-list"></div>
+            </section>
+          </aside>
+        </section>
+
+        <section class="panel">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">月度任务池</p>
+              <h2>本月 To-do 归档</h2>
+            </div>
+            <p class="section-desc">保留原始任务语义，方便继续补充周报、复盘与准备后续汇报。</p>
+          </div>
+          <div id="monthlyTodo" class="todo-columns"></div>
+        </section>
+
+        <section id="historySection" class="panel">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">历史记录</p>
+              <h2>按日期回看本月推进</h2>
+            </div>
+            <p class="section-desc">时间线适合回顾已做事项、脑暴议题和未完待续的跟进点。</p>
+          </div>
+          <div id="historyTimeline" class="timeline"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
