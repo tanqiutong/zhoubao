@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日竞品简报 · 分享展示 | 未来美术坊 AI 工作流</title>
+<style>
+  /* ── 基础变量 ── */
+  :root {
+    --green-dark: #1e5c38;
+    --green-mid: #3a9e6a;
+    --green-light: #e6f9ef;
+    --green-border: #52c47a;
+    --green-text: #1a7a44;
+    --bg: #f2f7f4;
+    --card: #ffffff;
+    --text-main: #1a2e23;
+    --text-sub: #4a6658;
+    --text-muted: #7a9a88;
+    --shadow: 0 4px 20px rgba(30,92,56,0.10);
+    --radius: 16px;
+    --accent: #ff6b35;
+    --accent-light: #fff0e8;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+
+  /* ── 进度条 ── */
+  .progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 0%; height: 4px;
+    background: linear-gradient(90deg, var(--green-dark), var(--green-border));
+    z-index: 9999;
+    transition: width .15s;
+  }
+
+  /* ── 顶部 HERO ── */
+  .hero {
+    background: linear-gradient(135deg, var(--green-dark) 0%, #2d7a52 55%, var(--green-mid) 100%);
+    color: #fff;
+    padding: 72px 48px 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 20px;
+    padding: 4px 16px;
+    font-size: 13px;
+    letter-spacing: .06em;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    line-height: 1.25;
+    margin-bottom: 16px;
+  }
+  .hero h1 span { color: #7fffc4; }
+  .hero p {
+    font-size: 17px;
+    opacity: .85;
+    max-width: 560px;
+    margin: 0 auto 36px;
+  }
+  .hero-meta {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    font-size: 13px;
+    opacity: .75;
+  }
+  .hero-meta span { display: flex; align-items: center; gap: 6px; }
+
+  /* ── 导航锚点 ── */
+  .nav-pills {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(242,247,244,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #d0e8d8;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .nav-pill {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 18px;
+    border-radius: 20px;
+    text-decoration: none;
+    color: var(--text-sub);
+    background: #fff;
+    border: 1px solid #cce5d8;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .nav-pill:hover, .nav-pill.active {
+    background: var(--green-dark);
+    color: #fff;
+    border-color: var(--green-dark);
+  }
+  .nav-pill .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px; height: 20px;
+    background: var(--green-light);
+    color: var(--green-dark);
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 800;
+    margin-right: 4px;
+  }
+  .nav-pill:hover .num, .nav-pill.active .num {
+    background: rgba(255,255,255,0.25);
+    color: #fff;
+  }
+
+  /* ── 主容器 ── */
+  .container { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  /* ── 章节通用 ── */
+  .section {
+    margin-bottom: 64px;
+    scroll-margin-top: 80px;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--green-border);
+  }
+  .section-num {
+    width: 44px; height: 44px;
+    background: var(--green-dark);
+    color: #fff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+  .section-title-block h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--green-dark);
+  }
+  .section-title-block p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* ── 卡片 ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+  }
+  .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  /* ── 痛点卡片 (为什么) ── */
+  .pain-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .pain-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+    border-top: 4px solid var(--accent);
+    position: relative;
+  }
+  .pain-card.solved { border-top-color: var(--green-border); }
+  .pain-icon { font-size: 28px; margin-bottom: 10px; }
+  .pain-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .pain-desc { font-size: 13px; color: var(--text-sub); line-height: 1.7; }
+  .pain-tag {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 4px;
+  }
+  .tag-problem { background: #fdecea; color: #c62828; }
+  .tag-solved { background: var(--green-light); color: var(--green-text); }
+
+  /* ── 流程图 (怎么样) ── */
+  .flow {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .flow-step {
+    flex: 1;
+    min-width: 150px;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    position: relative;
+  }
+  .flow-step + .flow-step::before {
+    content: '→';
+    position: absolute;
+    left: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--green-border);
+    font-weight: 700;
+  }
+  .flow-icon { font-size: 28px; margin-bottom: 8px; }
+  .flow-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: var(--green-dark); }
+  .flow-desc { font-size: 12px; color: var(--text-sub); line-height: 1.65; }
+
+  /* ── 时间轴 ── */
+  .timeline { border-left: 3px solid var(--green-border); padding-left: 24px; margin-bottom: 20px; }
+  .tl-item { position: relative; margin-bottom: 20px; }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -31px;
+    top: 6px;
+    width: 14px; height: 14px;
+    background: var(--green-border);
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px var(--green-border);
+  }
+  .tl-date { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+  .tl-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .tl-desc { font-size: 13px; color: var(--text-sub); line-height: 1.7; }
+
+  /* ── 功能展示 (是什么) ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .feature-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--green-border);
+  }
+  .feature-card.accent { border-left-color: var(--accent); }
+  .feature-card.blue { border-left-color: var(--blue); }
+  .feature-icon { font-size: 22px; margin-bottom: 8px; }
+  .feature-title { font-size: 13px; font-weight: 700; margin-bottom: 4px; color: var(--text-main); }
+  .feature-desc { font-size: 12px; color: var(--text-sub); line-height: 1.65; }
+
+  /* ── 截图预览区域 ── */
+  .report-preview {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    border: 2px dashed var(--green-border);
+  }
+  .preview-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .preview-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--green-border);
+  }
+  .preview-label { font-size: 12px; font-weight: 700; color: var(--green-text); }
+  .preview-sections {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  @media(max-width: 500px) { .preview-sections { grid-template-columns: 1fr 1fr; } }
+  .preview-section {
+    background: var(--green-light);
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .preview-section .num { font-size: 22px; font-weight: 800; color: var(--green-dark); }
+  .preview-section .lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── 价值数据 (使用价值) ── */
+  .value-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .value-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .value-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--green-dark), var(--green-border));
+  }
+  .value-num {
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--green-dark);
+    line-height: 1.1;
+  }
+  .value-unit { font-size: 15px; font-weight: 700; color: var(--green-mid); }
+  .value-label { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+  .value-desc { font-size: 13px; color: var(--text-sub); margin-top: 8px; line-height: 1.65; }
+
+  /* ── 总结卡片 ── */
+  .summary-card {
+    background: linear-gradient(135deg, var(--green-dark) 0%, #2d7a52 100%);
+    color: #fff;
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .summary-card .label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    opacity: .7;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .summary-card p { font-size: 16px; font-weight: 600; line-height: 1.8; }
+  .summary-card .highlight {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+    padding: 1px 8px;
+  }
+
+  /* ── 引言块 ── */
+  .quote {
+    border-left: 4px solid var(--green-border);
+    background: var(--green-light);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    color: var(--green-text);
+    font-weight: 500;
+    line-height: 1.75;
+  }
+
+  /* ── 对比表 ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: var(--card);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .compare-table th {
+    background: var(--green-dark);
+    color: #fff;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+  }
+  .compare-table td {
+    padding: 11px 16px;
+    border-bottom: 1px solid #eef3f0;
+    color: var(--text-sub);
+  }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:hover td { background: var(--green-light); }
+  .compare-table .before { color: #c62828; font-weight: 600; }
+  .compare-table .after { color: var(--green-text); font-weight: 600; }
+
+  /* ── 标签 ── */
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 4px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+  }
+  .badge-green { background: var(--green-light); color: var(--green-text); }
+  .badge-orange { background: #fff0e8; color: #c05a10; }
+  .badge-blue { background: var(--blue-light); color: var(--blue); }
+  .badge-red { background: #fdecea; color: #c62828; }
+
+  /* ── 双栏 ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  @media(max-width: 580px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* ── 结语 ── */
+  .footer {
+    text-align: center;
+    padding: 40px 24px;
+    color: var(--text-muted);
+    font-size: 13px;
+    border-top: 1px solid #d0e8d8;
+    margin-top: 40px;
+  }
+  .footer strong { color: var(--green-dark); }
+
+  /* ── 响应式 ── */
+  @media(max-width: 640px) {
+    .hero { padding: 48px 24px 56px; }
+    .flow { gap: 10px; }
+    .flow-step + .flow-step::before { display: none; }
+    .container { padding: 32px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 进度条 -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">🎨 未来美术坊 · AI 工作流</div>
+  <h1><span>每日竞品简报</span> · AI 自动化实践</h1>
+  <p>用 AI 工作流把竞品调研从人工变成自动</p>
+  <div class="hero-meta">
+    <span>📅 2026-04-14</span>
+    <span>📊 覆盖 6 大竞品方向</span>
+    <span>⚡ 每日自动发布</span>
+  </div>
+</div>
+
+<!-- 导航 -->
+<nav class="nav-pills" id="navPills">
+  <a class="nav-pill" href="#why"><span class="num">1</span>为什么做</a>
+  <a class="nav-pill" href="#how"><span class="num">2</span>怎么做到的</a>
+  <a class="nav-pill" href="#what"><span class="num">3</span>是什么样的</a>
+  <a class="nav-pill" href="#value"><span class="num">4</span>带来什么价值</a>
+</nav>
+
+<div class="container">
+
+  <!-- ══════════════════════════════════════════
+       PART 1 · 为什么做
+  ══════════════════════════════════════════ -->
+  <section class="section" id="why">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <div class="section-title-block">
+        <h2>为什么做？</h2>
+        <p>从业务痛点出发</p>
+      </div>
+    </div>
+
+    <div class="quote">
+      未来美术坊是一款面向乡村美术教师的小程序，
+      产品阶段处于早期冷启动，每一个产品决策都需要「看清方向」。
+    </div>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <div class="pain-icon">⏰</div>
+        <div class="pain-title">时间成本极高</div>
+        <div class="pain-desc">每日手动搜集竞品动态、政策资讯需要 60+ 分钟，且容易遗漏。</div>
+        <div class="pain-tag tag-problem">痛点</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">🔍</div>
+        <div class="pain-title">信息碎片化</div>
+        <div class="pain-desc">信息散落在公众号、微博、官网、工信部公告，需多平台整合。</div>
+        <div class="pain-tag tag-problem">痛点</div>
+      </div>
+      <div class="pain-card">
+        <div class="pain-icon">🧠</div>
+        <div class="pain-title">缺乏针对性分析</div>
+        <div class="pain-desc">看完信息不知道对美术坊有何影响，缺产品视角的解读。</div>
+        <div class="pain-tag tag-problem">痛点</div>
+      </div>
+      <div class="pain-card solved">
+        <div class="pain-icon">🤖</div>
+        <div class="pain-title">AI 能做到</div>
+        <div class="pain-desc">搜索、整合、过滤、生成报告全流程自动化，只需清晰的提示词 + 自动化触发器。</div>
+        <div class="pain-tag tag-solved">解法</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">为什么选「竞品简报」这个场景</div>
+      <p style="font-size:14px;color:var(--text-sub);line-height:1.85;">
+        产品冷启动阶段需要持续关注：
+        <span class="badge badge-blue">AI 美育工具竞品</span>
+        <span class="badge badge-orange">教育政策动态</span>
+        <span class="badge badge-green">腾讯内部能力</span>
+        <span class="badge badge-red">竞品迭代速度</span>
+        <br><br>
+        这类信息<strong>频率高、来源杂、需要产品判断</strong>，正是 AI 擅长的：大范围搜索 + 结构化整理 + 产品视角解读。
+        同时需要一份<strong>可直接对外共享的专业报告</strong>，而不只是个人笔记。
+      </p>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PART 2 · 怎么样
+  ══════════════════════════════════════════ -->
+  <section class="section" id="how">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <div class="section-title-block">
+        <h2>怎么做到的？</h2>
+        <p>AI 工作流全链路</p>
+      </div>
+    </div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-icon">⏰</div>
+        <div class="flow-title">定时触发</div>
+        <div class="flow-desc">WorkBuddy 自动化<br>每日自动启动</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🌐</div>
+        <div class="flow-title">多源搜索</div>
+        <div class="flow-desc">Web 搜索 + 微信文章<br>覆盖 6 大信息维度</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🧠</div>
+        <div class="flow-title">AI 分析</div>
+        <div class="flow-desc">针对美术坊场景<br>生成影响解读</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">📄</div>
+        <div class="flow-title">生成报告</div>
+        <div class="flow-desc">结构化 HTML 格式<br>可视化呈现</div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🚀</div>
+        <div class="flow-title">自动发布</div>
+        <div class="flow-desc">GitHub Pages 存档<br>+ 企业微信推送</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-label">提示词设计</div>
+        <p style="font-size:13px;color:var(--text-sub);line-height:1.8;">
+          让 AI 做<strong>有产品视角的分析师</strong>，每条信息强制输出：
+          <span class="badge badge-green">动态事实</span>
+          <span class="badge badge-orange">对美术坊的影响</span>
+          <span class="badge badge-blue">建议行动</span>
+          <span class="badge badge-red">风险预警</span>
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-label">增量追踪机制</div>
+        <p style="font-size:13px;color:var(--text-sub);line-height:1.8;">
+          每日高亮标注<strong>「今日新增」</strong>内容，避免重复阅读，阅读成本降低 80%。
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">搭建历程</div>
+      <div class="timeline">
+        <div class="tl-item">
+          <div class="tl-date">04-03</div>
+          <div class="tl-title">第 1 期手动试跑</div>
+          <div class="tl-desc">验证内容框架：竞品动态 / 行业趋势 / 腾讯美术力 / 产品建议 / 风险观察 / 竞品地图，共 6 个板块</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">04-07</div>
+          <div class="tl-title">样式体系稳定</div>
+          <div class="tl-desc">确立视觉风格，新增「今日新增」高亮机制</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">04-09</div>
+          <div class="tl-title">发布管线打通</div>
+          <div class="tl-desc">GitHub Pages 静态托管 + 企业微信 Webhook 推送</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">04-11</div>
+          <div class="tl-title">全自动化上线</div>
+          <div class="tl-desc">WorkBuddy 定时任务配置完成，无需人工干预</div>
+        </div>
+        <div class="tl-item">
+          <div class="tl-date">04-14（今天）</div>
+          <div class="tl-title">第 11 期 · 持续运行</div>
+          <div class="tl-desc">今日新增：AI 行业重大动态、工信部教育政策、乡村教师公益计划</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PART 3 · 是什么
+  ══════════════════════════════════════════ -->
+  <section class="section" id="what">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <div class="section-title-block">
+        <h2>是什么样的？</h2>
+        <p>报告结构与内容示例</p>
+      </div>
+    </div>
+
+    <div class="quote">
+      结构固定的 HTML 页面，每日定时送达，阅读约 5 分钟。以今天（第 11 期）为例：
+    </div>
+
+    <div class="report-preview">
+      <div class="preview-header">
+        <div class="preview-dot"></div>
+        <div class="preview-label">📊 今日报告数据总览（第 11 期 · 2026-04-14）</div>
+      </div>
+      <div class="preview-sections">
+        <div class="preview-section">
+          <div class="num">8</div>
+          <div class="lbl">竞品动态</div>
+        </div>
+        <div class="preview-section">
+          <div class="num">5</div>
+          <div class="lbl">行业趋势</div>
+        </div>
+        <div class="preview-section">
+          <div class="num">5</div>
+          <div class="lbl">腾讯美术力</div>
+        </div>
+        <div class="preview-section">
+          <div class="num">3</div>
+          <div class="lbl">产品建议</div>
+        </div>
+        <div class="preview-section">
+          <div class="num">6</div>
+          <div class="lbl">风险观察</div>
+        </div>
+        <div class="preview-section">
+          <div class="num">3</div>
+          <div class="lbl">今日新增</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-grid">
+      <div class="feature-card accent">
+        <div class="feature-icon">🔍</div>
+        <div class="feature-title">竞品动态</div>
+        <div class="feature-desc">Canva、Adobe Firefly、美术宝等，每条动态附美术坊视角解读</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📈</div>
+        <div class="feature-title">行业趋势</div>
+        <div class="feature-desc">AI+教育政策、美育政策、乡村教育动向</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">腾讯美术力</div>
+        <div class="feature-desc">腾讯混元 / 游戏IP / 腾讯教育生态最新动态，第一时间识别可用内部资源</div>
+      </div>
+      <div class="feature-card blue">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-title">产品建议</div>
+        <div class="feature-desc">按 P0/P1/P2 优先级输出可落地行动，不只是信息陈述</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚠️</div>
+        <div class="feature-title">风险观察</div>
+        <div class="feature-desc">竞品追赶、政策风险、用户流失风险，提前预判</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🗺️</div>
+        <div class="feature-title">竞品地图</div>
+        <div class="feature-desc">可视化呈现竞品分布，帮助定位美术坊的差异化定位</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">📌 今日简报一句话结论（示例）</div>
+      <div class="summary-card" style="margin-bottom:0;">
+        <div class="label">TODAY'S KEY INSIGHT</div>
+        <p>GPT-6 今日正式亮相（Symphony架构 · 200万Token · 性能+40%）、腾讯混元3.0本月内即将发布，全球AI能力代际跃迁与国内政策强制落地同步叠加——未来美术坊需在混元3.0发布前<span class="highlight">锁定 AI 底座接入方案</span>，同时借工信部"AI+高价值场景"申报窗口<span class="highlight">争取官方背书</span>，抢占政策红利的黄金 30 天。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PART 4 · 使用价值
+  ══════════════════════════════════════════ -->
+  <section class="section" id="value">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <div class="section-title-block">
+        <h2>带来什么价值？</h2>
+        <p>可量化的工作提效</p>
+      </div>
+    </div>
+
+    <div class="value-grid">
+      <div class="value-card">
+        <div class="value-num">90<span class="value-unit">%</span></div>
+        <div class="value-label">每日竞调时间压缩</div>
+        <div class="value-desc">60+ 分钟手动搜集 → 5 分钟阅读报告</div>
+      </div>
+      <div class="value-card">
+        <div class="value-num">11</div>
+        <div class="value-label">已持续运行天数</div>
+        <div class="value-desc">4 月 3 日起每天稳定输出，无遗漏</div>
+      </div>
+      <div class="value-card">
+        <div class="value-num">6</div>
+        <div class="value-label">信息维度覆盖</div>
+        <div class="value-desc">竞品 / 趋势 / 腾讯生态 / 产品建议 / 风险 / 竞品地图</div>
+      </div>
+      <div class="value-card">
+        <div class="value-num">0</div>
+        <div class="value-label">重复劳动</div>
+        <div class="value-desc">全自动运行，精力解放给产品决策</div>
+      </div>
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th>AI 工作流之前</th>
+          <th>AI 工作流之后</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>每日信息获取时间</td>
+          <td class="before">60+ 分钟手动搜集</td>
+          <td class="after">5 分钟阅读报告</td>
+        </tr>
+        <tr>
+          <td>信息覆盖广度</td>
+          <td class="before">仅能关注 2-3 个竞品</td>
+          <td class="after">同时覆盖 6 大维度、10+ 竞品</td>
+        </tr>
+        <tr>
+          <td>分析深度</td>
+          <td class="before">看信息，自己想影响</td>
+          <td class="after">每条信息自带美术坊视角解读</td>
+        </tr>
+        <tr>
+          <td>信息交付形式</td>
+          <td class="before">笔记碎片，无法共享</td>
+          <td class="after">专业 HTML 报告 + 企微推送，可直接对外共享</td>
+        </tr>
+        <tr>
+          <td>历史可追溯性</td>
+          <td class="before">无存档，靠记忆</td>
+          <td class="after">GitHub Pages 全量存档，每期可回溯</td>
+        </tr>
+        <tr>
+          <td>响应重大事件速度</td>
+          <td class="before">依赖主动刷新，容易错过</td>
+          <td class="after">次日必达，GPT-6今日发布今日即入报告</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-label">对产品决策的影响</div>
+        <p style="font-size:13px;color:var(--text-sub);line-height:1.8;">
+          · 发现混元3.0即将发布 → 提前规划 AI 底座接入节点<br>
+          · 发现工信部教育场景申报窗口 → 列入近期行动清单<br>
+          · 发现乡村教师公益计划 → 识别高质量用户获取渠道
+        </p>
+      </div>
+      <div class="card">
+        <div class="card-label">AI 提效的具体路径</div>
+        <p style="font-size:13px;color:var(--text-sub);line-height:1.8;">
+          · 把重复性信息搜集交给 AI<br>
+          · 精力集中在需要人判断的决策上<br>
+          · 积累可复用的竞品监控体系
+        </p>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <div class="label">核心结论</div>
+      <p>
+        每日竞品简报是
+        <span class="highlight">将「信息搜集」从人工切换到 AI 的完整实践</span>。
+        场景清晰、提示词精准、自动化管线打通，
+        AI 就能成为<span class="highlight">每天主动送达决策情报的竞品分析师</span>。
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <strong>未来美术坊 · AI 工作流实践</strong> &nbsp;|&nbsp; 2026-04-14
+</div>
+
+<!-- 进度条逻辑 + 导航高亮 -->
+<script>
+  // 进度条
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const progress = (doc.scrollTop || document.body.scrollTop) /
+      ((doc.scrollHeight || document.body.scrollHeight) - doc.clientHeight) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+  });
+
+  // 导航高亮
+  const sections = document.querySelectorAll('section.section');
+  const pills = document.querySelectorAll('.nav-pill');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        pills.forEach(p => {
+          p.classList.toggle('active', p.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.4, rootMargin: '-80px 0px 0px 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
