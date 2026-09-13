@@ -1,0 +1,16 @@
+{
+  "name": "周报网站 (Weekly Report Site)",
+  "ports": [
+    {
+      "name": "static-server",
+      "port": 8080
+    }
+  ],
+  "terminals": [
+    {
+      "name": "static-server",
+      "command": "python3 -m http.server 8080",
+      "description": "Serves the static weekly-report site from the repo root at http://localhost:8080 (open index.html)."
+    }
+  ]
+}
